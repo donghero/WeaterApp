@@ -7,8 +7,12 @@ weather report by Expo
 
 I use "expo-location"API and get current position and show correct weather tempearature. 
 
-I have already learned react.js and it's the first time to make a app by expo. My weather app is not 
-
-very big, but it has a big impact on me.
+I have already learned react.js and it's the first time to make a app by expo. 
+  
+My weather app is not very big, but it has a big impact on me.
 
 # Third, have a nice day!  
+
+# Result:(the gift loading needs some time XD)
+
+![weather report](https://github.com/donghero/WeaterApp/blob/master/assets/weather.gif)
