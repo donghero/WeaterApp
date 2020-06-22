@@ -1,4 +1,4 @@
-# Weather Report
+## Weather App
 weather report by Expo 
 
 # First, my weather app is based on expo. It is more convenient than react-native
