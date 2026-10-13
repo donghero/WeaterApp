@@ -106,19 +106,22 @@ const weatherOptions = {
 
 };
 export default function Weather({temp, condition}) {
+    const options = Object.prototype.hasOwnProperty.call(weatherOptions, condition)
+        ? weatherOptions[condition]
+        : {iconName: "weather-cloudy", gradient: ["#373B44", "#4286f4"], title: condition, subtitle: "Current weather at your location"};
     return (
         <LinearGradient
-            colors={weatherOptions[condition].gradient}
+            colors={options.gradient}
             style={styles.container}>
             <StatusBar style="light"/>
             <View style={styles.halfContainer}>
-                <MaterialCommunityIcons name={weatherOptions[condition].iconName} size={96} color="white"/>
+                <MaterialCommunityIcons name={options.iconName} size={96} color="white"/>
                 <Text style={styles.temp}>{temp}°</Text>
             </View>
             <View style={styles.halfContainer}>
                 <View style={{...styles.halfContainer, ...styles.textContainer}}>
-                    <Text style={styles.title}>{weatherOptions[condition].title}</Text>
-                    <Text style={styles.subtitle}>{weatherOptions[condition].subtitle}</Text>
+                    <Text style={styles.title}>{options.title}</Text>
+                    <Text style={styles.subtitle}>{options.subtitle}</Text>
                 </View>
             </View>
         </LinearGradient>
@@ -127,7 +130,7 @@ export default function Weather({temp, condition}) {
 
 Weather.propTypes = {
     temp: PropTypes.number.isRequired,
-    condition: PropTypes.oneOf(["Thunderstorm", "Sunny", "Drizzle", "Rain", "Snow", "Haze", "Clear", "Clouds", "Fog", "Tornado"]).isRequired
+    condition: PropTypes.string.isRequired
 };
 
 const styles = StyleSheet.create({

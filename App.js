@@ -1,53 +1,57 @@
 import React from "react";
-import {Alert} from "react-native"
-import Loading from "./Loading";
+import {Button, StyleSheet, Text, View} from "react-native";
 import * as Location from "expo-location";
-import axios from "axios";
+import Loading from "./Loading";
 import Weather from "./Weather";
+import {fetchWeather} from "./weatherClient";
 
 export default class App extends React.Component {
-    state = {
-        isLoading: true
-    };
+    state = {isLoading: true, error: null};
+    mounted = false;
 
-    render() {
-        const {isLoading, temp, condition} = this.state;
-        return (
-            isLoading ? <Loading/> : <Weather temp={Math.round(temp)} condition={condition} />
-        );
+    componentDidMount() {
+        this.mounted = true;
+        this.getLocation();
     }
 
-    getWeather = async (latitude, longitude) => {
-        const {
-            data: {
-                main: {temp},
-                weather
-            }
-        } = await axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=26df358bbce22fdab6dc8e44bac26a6b&units=metric`);
-
-        this.setState({
-            isLoading: false,
-            temp,
-            condition: weather[0].main
-        })
-    };
+    componentWillUnmount() {
+        this.mounted = false;
+        this.controller?.abort();
+    }
 
     getLocation = async () => {
+        this.setState({isLoading: true, error: null});
+        this.controller = new AbortController();
         try {
-            await Location.requestPermissionsAsync();
-            await Location.getPermissionsAsync();
-            const {coords: {latitude, longitude}} = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.Highest});
-            this.getWeather(latitude, longitude);
+            const {status} = await Location.requestForegroundPermissionsAsync();
+            if (status !== "granted") {
+                throw new Error("Location permission is required to show your local weather. Enable it in Settings and try again.");
+            }
+            const {coords} = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.Balanced});
+            const weather = await fetchWeather(coords.latitude, coords.longitude, {
+                apiKey: process.env.EXPO_PUBLIC_OPENWEATHER_API_KEY,
+                signal: this.controller.signal
+            });
+            if (this.mounted) this.setState({...weather, isLoading: false});
         } catch (error) {
-            Alert.alert("Can not find ", "So sad");
+            if (this.mounted) this.setState({isLoading: false, error: error.message || "Unable to load weather. Please try again."});
         }
     };
 
-    componentDidMount() {
-        this.getLocation().then((res) => {
-        });
+    render() {
+        const {isLoading, error, temp, condition} = this.state;
+        if (isLoading) return <Loading/>;
+        if (error) return (
+            <View style={styles.error}>
+                <Text accessibilityRole="alert" style={styles.message}>{error}</Text>
+                <Button title="Try again" onPress={this.getLocation}/>
+            </View>
+        );
+        return <Weather temp={Math.round(temp)} condition={condition}/>;
     }
 }
 
-
-
+const styles = StyleSheet.create({
+    error: {flex: 1, justifyContent: "center", padding: 32, backgroundColor: "#FDF6AA"},
+    message: {fontSize: 18, marginBottom: 24, color: "#2c2c2c"}
+});
