@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
-    "expo": "~57.0.28",
+    "expo": "~58.0.22",
     "expo-font": "~57.0.4",
     "expo-linear-gradient": "~57.0.2",
     "expo-location": "~57.0.21",
